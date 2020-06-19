@@ -1,0 +1,10 @@
+BUGs
+  bordas do mapa nao funciona todas
+
+FAZER
+  imagem mapa
+  Fundo
+
+FEITO
+  3d
+  Colocar Velocidade no carro

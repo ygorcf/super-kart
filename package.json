@@ -1,0 +1,16 @@
+{
+  "name": "ygor",
+  "version": "1.0.0",
+  "description": "Um pequeno projeto de um joguinho de corrida.",
+  "main": "index.js",
+  "repository": "https://github.com/ygorcf/super-kart",
+  "author": "Ygor Cruz (ygorcruzfelix@gmail.com)",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "http-server -c-1 src"
+  },
+  "dependencies": {
+    "http-server": "^0.12.3"
+  }
+}
