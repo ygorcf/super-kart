@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
+import { Map } from '../../models/Map'
+import { Resolution } from '../../models/view/Resolution'
+import { View } from '../../models/view/View'
+
+import img from '../../assets/mapa1.bmp'
+
 // //var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 // // var graphics = null, graphicsMapa = null;
@@ -683,24 +689,21 @@ import React, { useEffect, useState } from 'react'
 
 function Game() {
   const canvasRef = React.createRef<HTMLCanvasElement>()
-  const [context, setContext] = useState<CanvasRenderingContext2D | null>(null)
 
   useEffect(() => {
     if (canvasRef.current !== null) {
       canvasRef.current.width = 300
       canvasRef.current.height = 300
-      setContext(canvasRef.current.getContext('2d'))
-    }
-    drawRect(0, 0, 300, 300, 'black')
-    drawRect(10, 10, 150, 150, 'red')
-  }, [canvasRef, context])
 
-  function drawRect(x: number, y: number, w: number, h: number, color: string) {
-    if (context !== null) {
-      context.fillStyle = color
-      context.fillRect(x, y, w, h)
+      const resolution = new Resolution(300, 300, 1)
+      const view = new View(canvasRef.current, resolution)
+      const map = new Map(img)
+
+      map.load().then(() => {
+        view.drawObject(map)
+      })
     }
-  }
+  }, [canvasRef])
 
   return (
     <canvas ref={canvasRef}></canvas>
