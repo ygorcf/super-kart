@@ -1,32 +1,70 @@
-import { Resolution } from "./Resolution"
-import { ObjectDrawable } from './ObjectDrawable'
+import { Position } from "../Position"
+import { ObjectDrawable } from '../ObjectDrawable'
+import { Loadable } from '../Loadable'
+import { ViewObject } from './ViewObject'
 
-export class View {
-  context: CanvasRenderingContext2D | null
+export class View extends Loadable {
+  private objectsPositions: ViewObject[][][] = []
+  private objectsToLoad: { object: Loadable & ObjectDrawable, position: Position }[] = []
 
-  constructor (public canvas: HTMLCanvasElement, public resolution: Resolution) {
-    this.context = canvas.getContext('2d')
-
-    this.canvas.width = resolution.x
-    this.canvas.height = resolution.y
-  }
-
-  drawObject (object: ObjectDrawable) {
-    for (let y = 0; y < object.height; y++) {
-      for (let x = 0; x < object.width; x++) {
-        this.drawRectByScale(x, y, object.getColorAt(x, y))
-      }
+  addObject (object: ObjectDrawable, position: Position) {
+    if (object instanceof Loadable && !object.loaded) {
+      this.objectsToLoad.push({ object, position })
+    } else {
+      this.addObjectLoaded(object, position)
     }
   }
 
-  drawRectByScale (x: number, y: number, color: string) {
-    this.drawRect(x, y, this.resolution.scale, this.resolution.scale, color)
+  removeObject (object: ObjectDrawable, position: Position) {
+    let objectPosition
+    for (let x = position.x; x < object.width; x++) {
+      for (let y = position.y; y < object.height; y++) {
+        objectPosition = this.objectsPositions[x][y].findIndex(viewObject => viewObject.object === object)
+        if (objectPosition > -1) {
+          this.objectsPositions[x][y].splice(objectPosition, 1)
+        }
+      }
+    }
+
+    if (object instanceof Loadable && !object.loaded) {
+      const i = this.objectsToLoad.findIndex(objectToLoad => objectToLoad.object === object)
+      i > -1 && this.objectsToLoad.splice(i, 1)
+    }
   }
 
-  drawRect(x: number, y: number, w: number, h: number, color: string) {
-    if (this.context !== null) {
-      this.context.fillStyle = color
-      this.context.fillRect(x, y, w, h)
+  getObjectsAt (x: number, y: number, w: number, h: number) {
+    const objects: ViewObject[] = []
+
+    for (let _x = x; _x < w; _x++) {
+      for (let _y = y; _y < h; _y++) {
+        this.objectsPositions[_x]?.[_y] && this.objectsPositions[_x][_y].forEach(object => {
+          !objects.find(viewObject => viewObject.isEquals(object)) && objects.push(object)
+        })
+      }
+    }
+
+    return objects
+  }
+
+  async onLoad () {
+    await Promise.all(this.objectsToLoad.map(async objectTotLoad => {
+      await objectTotLoad.object.load()
+      this.addObjectLoaded(objectTotLoad.object, objectTotLoad.position)
+    }))
+  }
+
+  private addObjectLoaded (object: ObjectDrawable, position: Position) {
+    for (let x = position.x; x < object.width; x++) {
+      for (let y = position.y; y < object.height; y++) {
+        if (!this.objectsPositions[x]) {
+          this.objectsPositions[x] = []
+        }
+        if (!this.objectsPositions[x][y]) {
+          this.objectsPositions[x][y] = []
+        }
+
+        this.objectsPositions[x][y].push(new ViewObject(object, position))
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Loadable } from './Loadable'
-import { ObjectDrawable } from './view/ObjectDrawable'
+import { ObjectDrawable } from './ObjectDrawable'
 
-export class Map implements Loadable, ObjectDrawable {
+export class Map extends Loadable implements ObjectDrawable {
 
   imageUrl: string 
   imageData: ImageData | null = null
@@ -9,10 +9,11 @@ export class Map implements Loadable, ObjectDrawable {
   height = 0
 
   constructor (imagePath: string) {
+    super()
     this.imageUrl = `${document.location.protocol}//${document.location.host}${imagePath}`
   }
 
-  load () {
+  onLoad () {
     return new Promise<void>((resolve, reject) => {
       const img = document.createElement('img')
 

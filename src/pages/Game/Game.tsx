@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Map } from '../../models/Map'
 import { Resolution } from '../../models/view/Resolution'
 import { View } from '../../models/view/View'
+import { Scene } from '../../models/scene/Scene'
 
 import img from '../../assets/mapa1.bmp'
 
@@ -692,15 +693,18 @@ function Game() {
 
   useEffect(() => {
     if (canvasRef.current !== null) {
-      canvasRef.current.width = 300
-      canvasRef.current.height = 300
+      canvasRef.current.width = 800
+      canvasRef.current.height = 600
 
-      const resolution = new Resolution(300, 300, 1)
-      const view = new View(canvasRef.current, resolution)
+      const resolution = new Resolution(800, 600, 1)
+      const view = new View()
+      const scene = new Scene(canvasRef.current, resolution, view)
       const map = new Map(img)
-
-      map.load().then(() => {
-        view.drawObject(map)
+      view.addObject(map, { x: 150, y: 150 })
+      
+      view.load().then(() => {
+        scene.listenKeyboard()
+        scene.render()
       })
     }
   }, [canvasRef])
